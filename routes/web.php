@@ -25,3 +25,30 @@ Route::post('/delete/{index}', function ($index) {
     Session::put('tasks', $tasks);
     return redirect('/');
 });
+
+Route::get('/edit/{index}', function ($index) {
+    $tasks = Session::get('tasks', []);
+    $task = $tasks[$index] ?? null;
+
+    if ($task === null) {
+        return redirect('/')->with('error', 'Tugas tidak ditemukan.');
+    }
+
+    return view('edit', compact('task', 'index'));
+});
+
+Route::post('/update/{index}', function (Request $request, $index) {
+    $request->validate([
+        'task' => 'required|string|max:255',
+    ]);
+
+    $tasks = Session::get('tasks', []);
+    if (!isset($tasks[$index])) {
+        return redirect('/')->with('error', 'Tugas tidak ditemukan.');
+    }
+
+    $tasks[$index] = $request->task;
+    Session::put('tasks', $tasks);
+
+    return redirect('/')->with('success', 'Tugas berhasil diperbarui.');
+});
